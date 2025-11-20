@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>My Dashboard</h2>
+        <p class="text-muted">Welcome back, {{ current_user.first_name }}!</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Current Loans -->
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">📚 Currently Borrowed ({{ current_loans|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if current_loans %}
+                    <div class="list-group">
+                        {% for loan in current_loans %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ loan.book.title }}</h6>
+                            <small class="text-muted">By {{ loan.book.author }}</small>
+                            <div class="mt-2">
+                                <small>Due: {{ loan.due_date.strftime('%Y-%m-%d') }}</small>
+                                {% if loan.due_date < now %}
+                                    <span class="badge bg-danger float-end">Overdue</span>
+                                {% else %}
+                                    <span class="badge bg-warning float-end">Due Soon</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('transaction.return_book', transaction_id=loan.id) }}" 
+                               class="btn btn-sm btn-outline-primary mt-2">Return Book</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No books currently borrowed.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Reservations -->
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">⏰ Active Reservations ({{ active_reservations|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if active_reservations %}
+                    <div class="list-group">
+                        {% for reservation in active_reservations %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ reservation.book.title }}</h6>
+                            <small class="text-muted">By {{ reservation.book.author }}</small>
+                            <div class="mt-2">
+                                <small>Reserved: {{ reservation.reserve_date.strftime('%Y-%m-%d') }}</small>
+                                <span class="badge bg-info float-end">Position {{ loop.index }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No active reservations.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Fines -->
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">💰 Fines & Payments</h5>
+            </div>
+            <div class="card-body">
+                {% if unpaid_fines %}
+                    <div class="alert alert-warning">
+                        <strong>Total Due: £{{ "%.2f"|format(total_fine) }}</strong>
+                    </div>
+                    <div class="list-group">
+                        {% for fine in unpaid_fines %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <small>Fine for overdue book</small>
+                                    <br>
+                                    <strong>£{{ "%.2f"|format(fine.amount) }}</strong>
+                                </div>
+                                <a href="{{ url_for('transaction.pay_fine', fine_id=fine.id) }}" 
+                                   class="btn btn-sm btn-success">Pay Now</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No outstanding fines.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-md-6">
+        <div class="card dashboard-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">🚀 Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('books.book_catalog') }}" class="btn btn-outline-primary">
+                        Browse Books
+                    </a>
+                    <a href="{{ url_for('member.borrowing_history') }}" class="btn btn-outline-secondary">
+                        View Borrowing History
+                    </a>
+                    <a href="{{ url_for('transaction.view_reservations') }}" class="btn btn-outline-info">
+                        My Reservations
+                    </a>
+                    <a href="{{ url_for('transaction.view_fines') }}" class="btn btn-outline-warning">
+                        View All Fines
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card dashboard-card">
+            <div class="card-header">
+                <h5 class="mb-0">📋 Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Author</th>
+                                    <th>Borrowed</th>
+                                    <th>Returned</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions %}
+                                <tr>
+                                    <td>{{ transaction.book.title }}</td>
+                                    <td>{{ transaction.book.author }}</td>
+                                    <td>{{ transaction.borrow_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if transaction.return_date %}
+                                            {{ transaction.return_date.strftime('%Y-%m-%d') }}
+                                        {% else %}
+                                            <em>Not returned</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if transaction.status == 'borrowed' %}bg-warning{% else %}bg-success{% endif %}">
+                                            {{ transaction.status|title }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No recent activity.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

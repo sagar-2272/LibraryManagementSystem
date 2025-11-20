@@ -1,0 +1,38 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.book-card {
+    transition: transform 0.2s;
+    height: 100%;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.status-available {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-checked_out {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.status-reserved {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.dashboard-card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.alert {
+    border-radius: 8px;
+}

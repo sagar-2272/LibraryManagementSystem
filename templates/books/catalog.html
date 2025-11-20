@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Book Catalog</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if current_user.is_authenticated and current_user.role in ['librarian', 'admin'] %}
+            <a href="{{ url_for('books.add_book') }}" class="btn btn-success">Add New Book</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Search and Filter Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" name="search" placeholder="Search by title, author, ISBN..." value="{{ search_term }}">
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" name="category">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if current_category == category %}selected{% endif %}>
+                            {{ category }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Books Grid -->
+<div class="row">
+    {% for book in books.items %}
+    <div class="col-md-3 mb-4">
+        <div class="card book-card h-100">
+            <div class="card-body">
+                <h6 class="card-title">{{ book.title }}</h6>
+                <p class="card-text text-muted small">{{ book.author }}</p>
+                <p class="card-text">
+                    <span class="badge bg-secondary">{{ book.category }}</span>
+                    <span class="badge {% if book.available_copies > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ book.available_copies }} available
+                    </span>
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('books.book_details', book_id=book.id) }}" class="btn btn-sm btn-outline-primary w-100">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">No books found matching your criteria.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if books.pages > 1 %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% for page_num in books.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == books.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('books.book_catalog', page=page_num, search=search_term, category=current_category) }}">
+                        {{ page_num }}
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

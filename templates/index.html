@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto text-center">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Welcome to Library Management System</h1>
+            <p class="lead">Manage your library efficiently with our comprehensive system.</p>
+            <hr class="my-4">
+            <p>Browse books, manage borrowings, and track your reading history.</p>
+            <a class="btn btn-primary btn-lg" href="{{ url_for('books.book_catalog') }}">Browse Books</a>
+            {% if not current_user.is_authenticated %}
+                <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('auth.register') }}">Join Now</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card dashboard-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">📚 Extensive Collection</h5>
+                <p class="card-text">Access thousands of books across various categories and genres.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">⏰ Easy Borrowing</h5>
+                <p class="card-text">Simple and quick book borrowing with automatic due date tracking.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">🔔 Smart Notifications</h5>
+                <p class="card-text">Get reminders for due dates and availability of reserved books.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

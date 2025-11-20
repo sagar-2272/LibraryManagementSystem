@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">{{ book.title }}</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="30%">Author:</th>
+                        <td>{{ book.author }}</td>
+                    </tr>
+                    <tr>
+                        <th>ISBN:</th>
+                        <td>{{ book.isbn }}</td>
+                    </tr>
+                    <tr>
+                        <th>Category:</th>
+                        <td><span class="badge bg-secondary">{{ book.category }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>Publisher:</th>
+                        <td>{{ book.publisher }} ({{ book.publication_year }})</td>
+                    </tr>
+                    <tr>
+                        <th>Location:</th>
+                        <td>{{ book.location }}</td>
+                    </tr>
+                    <tr>
+                        <th>Availability:</th>
+                        <td>
+                            <span class="status-{{ book.status.replace('_', '-') }}">
+                                {{ book.available_copies }} of {{ book.total_copies }} available
+                            </span>
+                            {% if reservation_count > 0 %}
+                                <br><small class="text-muted">{{ reservation_count }} reservation(s)</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Description:</th>
+                        <td>{{ book.description or "No description available." }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                {% if current_user.is_authenticated %}
+                    {% if book.available_copies > 0 %}
+                        <a href="{{ url_for('transaction.borrow_book', book_id=book.id) }}" 
+                           class="btn btn-success w-100 mb-2">Borrow This Book</a>
+                    {% else %}
+                        {% if user_reservation %}
+                            <button class="btn btn-warning w-100 mb-2" disabled>Already Reserved</button>
+                            <small class="text-muted">You have an active reservation for this book.</small>
+                        {% else %}
+                            <a href="{{ url_for('transaction.reserve_book', book_id=book.id) }}" 
+                               class="btn btn-warning w-100 mb-2">Reserve This Book</a>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if current_user.role in ['librarian', 'admin'] %}
+                        <hr>
+                        <a href="{{ url_for('books.edit_book', book_id=book.id) }}" 
+                           class="btn btn-outline-primary w-100">Edit Book Details</a>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <a href="{{ url_for('auth.login') }}">Login</a> to borrow or reserve books.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('books.book_catalog') }}" class="btn btn-secondary">Back to Catalog</a>
+</div>
+{% endblock %}
