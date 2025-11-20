@@ -45,8 +45,6 @@ if __name__ == '__main__':
     
     with app.app_context():
         db.create_all()
-        
-        # Check if we need to create dummy data
         from utils.seed_data import create_dummy_data
         if User.query.count() == 0:
             create_dummy_data()

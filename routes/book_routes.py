@@ -43,8 +43,6 @@ def book_catalog():
 @book_bp.route('/books/<int:book_id>')
 def book_details(book_id):
     book = Book.query.get_or_404(book_id)
-    
-    # Check if user has active reservation
     user_reservation = None
     if current_user.is_authenticated:
         user_reservation = Reservation.query.filter_by(
@@ -53,7 +51,6 @@ def book_details(book_id):
             status='active'
         ).first()
     
-    # Get active reservations count
     reservation_count = Reservation.query.filter_by(
         book_id=book_id, 
         status='active'

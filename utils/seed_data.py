@@ -17,7 +17,7 @@ def create_dummy_data():
         user = User(
             username=f'user{i}',
             email=f'user{i}@library.com',
-            password_hash=generate_password_hash('password123'),  # All users have same password for testing
+            password_hash=generate_password_hash('password123'),
             role=roles[i-1],
             first_name=f'First{i}',
             last_name=f'Last{i}',
@@ -28,8 +28,7 @@ def create_dummy_data():
     
     db.session.commit()
     print(f"Created {len(users)} users")
-    
-    # Create Books (100 books)
+
     books = []
     categories = ['Fiction', 'Science', 'Technology', 'History', 'Biography', 
                  'Mathematics', 'Physics', 'Computer Science', 'Literature', 'Art']
@@ -60,13 +59,10 @@ def create_dummy_data():
     db.session.commit()
     print(f"Created {len(books)} books")
     
-    # Create Transactions (borrow/return records)
     transactions = []
-    
-    # Create some borrowed books (30% of books are currently borrowed)
     member_users = [u for u in users if u.role == 'member']
     
-    for i in range(30):  # 30 currently borrowed books
+    for i in range(30): 
         user = random.choice(member_users)
         book = random.choice([b for b in books if b.available_copies > 0])
         
@@ -84,9 +80,8 @@ def create_dummy_data():
             )
             transactions.append(transaction)
             db.session.add(transaction)
-    
-    # Create some returned books (past transactions)
-    for i in range(50):  # 50 returned books
+
+    for i in range(50): 
         user = random.choice(member_users)
         book = random.choice(books)
         
@@ -106,13 +101,11 @@ def create_dummy_data():
     
     db.session.commit()
     print(f"Created {len(transactions)} transactions")
-    
-    # Create Reservations (10 active reservations)
+
     reservations = []
     
     for i in range(10):
         user = random.choice(member_users)
-        # Reserve books that are currently checked out
         borrowed_books = [t.book for t in Transaction.query.filter_by(status='borrowed').all()]
         if borrowed_books:
             book = random.choice(borrowed_books)
@@ -129,14 +122,13 @@ def create_dummy_data():
     db.session.commit()
     print(f"Created {len(reservations)} reservations")
     
-    # Create Fines (some overdue fines)
     fines = []
     overdue_transactions = [t for t in Transaction.query.filter_by(status='borrowed').all() 
                           if t.due_date and t.due_date < datetime.utcnow()]
     
-    for transaction in overdue_transactions[:15]:  # Create fines for 15 overdue books
+    for transaction in overdue_transactions[:15]: 
         days_overdue = (datetime.utcnow() - transaction.due_date).days
-        fine_amount = days_overdue * 0.50  # £0.50 per day
+        fine_amount = days_overdue * 0.50
         
         fine = Fine(
             user_id=transaction.user_id,
@@ -148,7 +140,6 @@ def create_dummy_data():
         fines.append(fine)
         db.session.add(fine)
     
-    # Mark some fines as paid
     for fine in fines[:5]:
         fine.status = 'paid'
         fine.paid_date = datetime.utcnow()

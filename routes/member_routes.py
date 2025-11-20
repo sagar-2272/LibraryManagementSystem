@@ -9,25 +9,22 @@ member_bp = Blueprint('member', __name__)
 @member_bp.route('/dashboard')
 @login_required
 def dashboard():
-    # Current borrowed books
+
     current_loans = Transaction.query.filter_by(
         user_id=current_user.id, 
         status='borrowed'
     ).all()
     
-    # Active reservations
     active_reservations = Reservation.query.filter_by(
         user_id=current_user.id, 
         status='active'
     ).all()
     
-    # Unpaid fines
     unpaid_fines = Fine.query.filter_by(
         user_id=current_user.id, 
         status='unpaid'
     ).all()
     
-    # Recent transactions (last 10)
     recent_transactions = Transaction.query.filter_by(
         user_id=current_user.id
     ).order_by(Transaction.borrow_date.desc()).limit(10).all()

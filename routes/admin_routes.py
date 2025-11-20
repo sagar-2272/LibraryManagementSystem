@@ -16,7 +16,7 @@ def generate_reports():
         flash('Access denied. Librarian role required.', 'error')
         return redirect(url_for('index'))
     
-    # Basic statistics
+    
     total_books = Book.query.count()
     total_members = User.query.filter_by(role='member').count()
     total_borrowed = Transaction.query.filter_by(status='borrowed').count()
@@ -27,7 +27,6 @@ def generate_reports():
     total_fines = Fine.query.filter_by(status='unpaid').count()
     total_fine_amount = db.session.query(func.sum(Fine.amount)).filter_by(status='unpaid').scalar() or 0
     
-    # Most popular books (most borrowed)
     popular_books = db.session.query(
         Book, 
         func.count(Transaction.id).label('borrow_count')
@@ -35,7 +34,6 @@ def generate_reports():
         func.count(Transaction.id).desc()
     ).limit(10).all()
     
-    # Most active members
     active_members = db.session.query(
         User,
         func.count(Transaction.id).label('borrow_count')
@@ -43,7 +41,6 @@ def generate_reports():
         func.count(Transaction.id).desc()
     ).limit(10).all()
     
-    # Overdue books
     overdue_books = Transaction.query.filter(
         Transaction.status == 'borrowed',
         Transaction.due_date < datetime.utcnow()

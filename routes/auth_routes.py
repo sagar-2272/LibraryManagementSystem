@@ -39,7 +39,6 @@ def register():
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         
-        # Check if user exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'error')
         elif User.query.filter_by(email=email).first():
