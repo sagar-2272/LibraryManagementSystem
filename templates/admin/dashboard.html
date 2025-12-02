@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Admin Dashboard</h2>
+        <p>Welcome, Admin! You can manage everything here.</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>📚 Books</h5>
+                <h2>{{ total_books }}</h2>
+                <a href="{{ url_for('admin.admin_books') }}" class="btn btn-primary btn-sm">Manage Books</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>👥 Members</h5>
+                <h2>{{ total_members }}</h2>
+                <a href="{{ url_for('admin.admin_users') }}" class="btn btn-primary btn-sm">Manage Users</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>📊 Reports</h5>
+                <h2>View</h2>
+                <a href="{{ url_for('admin.admin_reports') }}" class="btn btn-primary btn-sm">View Reports</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
