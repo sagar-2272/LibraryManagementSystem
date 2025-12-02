@@ -148,3 +148,4 @@ def create_dummy_data():
     print(f"Created {len(fines)} fines")
     
     print("Dummy data creation completed!")
+    print('sucess')
