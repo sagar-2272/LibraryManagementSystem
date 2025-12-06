@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="fas fa-user-shield"></i> Admin Login</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>Admin Access Only</strong><br>
+                    Use admin credentials to access the administration panel.
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required 
+                               placeholder="Enter admin username">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               placeholder="Enter admin password">
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="fas fa-sign-in-alt"></i> Admin Login
+                    </button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p class="text-muted small">
+                        <i class="fas fa-exclamation-triangle"></i> For regular users, please use 
+                        <a href="{{ url_for('auth.login') }}">regular login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Help Card -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6><i class="fas fa-key"></i> Default Admin Credentials</h6>
+                <p class="mb-1 small">Username: <code>admin</code></p>
+                <p class="mb-0 small">Password: <code>admin555</code></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

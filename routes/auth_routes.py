@@ -66,3 +66,24 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
+
+@auth_bp.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated and current_user.role == 'admin':
+        return redirect(url_for('admin.admin_dashboard'))
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(username=username).first()
+        
+        # Check if user is admin
+        if user and user.role == 'admin' and check_password_hash(user.password_hash, password):
+            login_user(user)
+            flash('Admin login successful!', 'success')
+            return redirect(url_for('admin.admin_dashboard'))
+        else:
+            flash('Invalid admin credentials or insufficient privileges.', 'error')
+    
+    return render_template('auth/admin_login.html')

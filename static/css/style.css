@@ -36,3 +36,31 @@ body {
 .alert {
     border-radius: 8px;
 }
+/* Admin specific styles */
+.nav-link.text-warning:hover {
+    color: #ffc107 !important;
+    font-weight: bold;
+}
+
+.card.border-warning {
+    border-width: 2px;
+}
+
+/* Badge colors for roles */
+.badge-role-admin {
+    background-color: #dc3545 !important;
+}
+
+.badge-role-librarian {
+    background-color: #fd7e14 !important;
+}
+
+.badge-role-member {
+    background-color: #28a745 !important;
+}
+
+/* Hover effects */
+.nav-link:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s;
+}
