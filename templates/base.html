@@ -32,13 +32,14 @@
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
-                    <!-- ALWAYS SHOW ADMIN LINK (even when logged out) -->
-                    <li class="nav-item">
-                        <a class="nav-link text-warning" href="{{ url_for('auth.admin_login') }}">
-                            <i class="fas fa-user-shield"></i> Admin
-                        </a>
-                    </li>
-                    
+                    {# Show Admin login ONLY when user is logged out #}
+{% if not current_user.is_authenticated %}
+    <li class="nav-item">
+        <a class="nav-link text-warning" href="{{ url_for('auth.admin_login') }}">
+            <i class="fas fa-user-shield"></i> Admin
+        </a>
+    </li>
+{% endif %}                    
                     {% if current_user.is_authenticated %}
                         <!-- Show admin dropdown if logged in as admin -->
                         {% if current_user.role == 'admin' %}
