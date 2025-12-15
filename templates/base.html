@@ -71,18 +71,6 @@
                     {% if current_user.is_authenticated %}
                         <!-- Show admin dropdown if logged in as admin -->
                         {% if current_user.role == 'admin' %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-success" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-crown"></i> Admin Panel
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.admin_books') }}"><i class="fas fa-book"></i> Manage Books</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.admin_users') }}"><i class="fas fa-users"></i> Manage Users</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('admin.admin_reports') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
-                                </ul>
-                            </li>
                         {% endif %}
                         
                         <li class="nav-item">
