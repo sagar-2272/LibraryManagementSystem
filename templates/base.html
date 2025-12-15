@@ -19,18 +19,46 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('books.book_catalog') }}"><i class="fas fa-book-open"></i> Books</a>
-                    </li>
-                    {% if current_user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('member.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                        </li>
-                    {% endif %}
-                </ul>
+    {# Logged out users: Home + Books visible #}
+    {% if not current_user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('books.book_catalog') }}"><i class="fas fa-book-open"></i> Books</a>
+        </li>
+
+    {# Logged in ADMIN: show only admin-focused links (no user menu) #}
+    {% elif current_user.role == 'admin' %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">
+                <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.admin_books') }}">
+                <i class="fas fa-book"></i> Manage Books
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('admin.admin_users') }}">
+                <i class="fas fa-users"></i> Manage Users
+            </a>
+        </li>
+
+    {# Logged in MEMBER: normal user menu #}
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('books.book_catalog') }}"><i class="fas fa-book-open"></i> Books</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('member.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        </li>
+    {% endif %}
+</ul>
                 <ul class="navbar-nav">
                     {# Show Admin login ONLY when user is logged out #}
 {% if not current_user.is_authenticated %}
