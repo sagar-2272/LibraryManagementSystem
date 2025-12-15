@@ -18,8 +18,13 @@
                         <input type="text" name="author" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label>ISBN</label>
-                        <input type="text" name="isbn" class="form-control" required>
+                        <label for="isbn" class="form-label">ISBN *</label>
+                        <input type="text" name="isbn" class="form-control" 
+                               value="{{ book.isbn if book else '' }}" 
+                               pattern="[0-9]{5}" 
+                               title="Must be exactly 5 digits (e.g., 12345)" 
+                               required maxlength="5" minlength="5">
+                        <small class="form-text text-muted">Must be exactly 5 digits (e.g., 12345)</small>
                     </div>
                     <div class="mb-3">
                         <label>Category</label>

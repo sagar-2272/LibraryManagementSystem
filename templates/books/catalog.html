@@ -37,28 +37,39 @@
 </div>
 
 <!-- Books Grid -->
+<!-- In the books grid section -->
 <div class="row">
     {% for book in books.items %}
     <div class="col-md-3 mb-4">
         <div class="card book-card h-100">
             <div class="card-body">
-                <h6 class="card-title">{{ book.title }}</h6>
-                <p class="card-text text-muted small">{{ book.author }}</p>
-                <p class="card-text">
+                <h6 class="card-title text-truncate" title="{{ book.title }}">{{ book.title }}</h6>
+                <p class="card-text text-muted small mb-1">{{ book.author }}</p>
+                <p class="card-text small mb-1">
                     <span class="badge bg-secondary">{{ book.category }}</span>
-                    <span class="badge {% if book.available_copies > 0 %}bg-success{% else %}bg-danger{% endif %}">
-                        {{ book.available_copies }} available
-                    </span>
+                    {% if book.available_copies > 0 %}
+                        <span class="badge bg-success">{{ book.available_copies }} available</span>
+                    {% else %}
+                        <span class="badge bg-danger">Out of stock</span>
+                    {% endif %}
+                </p>
+                <p class="card-text small text-muted mb-0">
+                    ISBN: {{ book.isbn }}
                 </p>
             </div>
-            <div class="card-footer">
-                <a href="{{ url_for('books.book_details', book_id=book.id) }}" class="btn btn-sm btn-outline-primary w-100">View Details</a>
+            <div class="card-footer bg-transparent border-top-0">
+                <a href="{{ url_for('books.book_details', book_id=book.id) }}" 
+                   class="btn btn-sm btn-outline-primary w-100">View Details</a>
             </div>
         </div>
     </div>
     {% else %}
     <div class="col-12">
-        <div class="alert alert-info">No books found matching your criteria.</div>
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-book fa-3x mb-3"></i>
+            <h4>No Books Found</h4>
+            <p class="mb-0">Try changing your search criteria or browse all books.</p>
+        </div>
     </div>
     {% endfor %}
 </div>

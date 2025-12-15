@@ -1,35 +1,99 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
-        <h2>Manage Users</h2>
-        <p class="text-muted">View and manage all library users.</p>
+    <div class="col-md-8">
+        <h2><i class="fas fa-users"></i> Manage Users</h2>
+        <p class="text-muted">Admin can view and manage all user accounts</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAllModal">
+            <i class="fas fa-trash"></i> Delete All Users
+        </button>
     </div>
 </div>
 
-<!-- Role Filter -->
-<div class="card mt-4">
+<!-- Danger Zone -->
+<div class="card border-danger mt-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h5>
+    </div>
     <div class="card-body">
-        <form method="GET" class="row g-3">
-            <div class="col-md-4">
-                <select class="form-select" name="role" onchange="this.form.submit()">
-                    <option value="">All Roles</option>
-                    <option value="member" {% if role_filter == 'member' %}selected{% endif %}>Members</option>
-                    <option value="librarian" {% if role_filter == 'librarian' %}selected{% endif %}>Librarians</option>
-                    <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admins</option>
-                </select>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>Delete All Members</h5>
+                        <p class="text-muted small">Remove all regular member accounts</p>
+                        <form method="POST" action="{{ url_for('admin.delete_all_members') }}" 
+                              onsubmit="return confirm('⚠️ WARNING: This will delete ALL member accounts! This action cannot be undone. Continue?');">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-user-slash"></i> Delete All Members
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </form>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>Delete All Users</h5>
+                        <p class="text-muted small">Remove ALL users except yourself</p>
+                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteAllModal">
+                            <i class="fas fa-trash"></i> Delete All Users
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Total Users</h5>
+                <h2>{{ users.total }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Admins</h5>
+                <h2>{{ total_admins }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Librarians</h5>
+                <h2>{{ total_librarians }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Members</h5>
+                <h2>{{ total_members }}</h2>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Users Table -->
 <div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">All Users ({{ users.total }})</h5>
+    </div>
     <div class="card-body">
         {% if users.items %}
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -39,6 +103,7 @@
                             <th>Role</th>
                             <th>Join Date</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,17 +114,64 @@
                             <td>{{ user.first_name }} {{ user.last_name }}</td>
                             <td>{{ user.email }}</td>
                             <td>
-                                <span class="badge {% if user.role == 'admin' %}bg-danger
-                                                   {% elif user.role == 'librarian' %}bg-warning
-                                                   {% else %}bg-info{% endif %}">
+                                <span class="badge 
+                                    {% if user.role == 'admin' %}bg-danger
+                                    {% elif user.role == 'librarian' %}bg-warning
+                                    {% else %}bg-info{% endif %}">
                                     {{ user.role|title }}
                                 </span>
                             </td>
-                            <td>{{ user.join_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ user.join_date.strftime('%Y-%m-%d') if user.join_date else 'N/A' }}</td>
                             <td>
-                                <span class="badge {% if user.is_active %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {{ 'Active' if user.is_active else 'Inactive' }}
-                                </span>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-info view-user-btn"
+                                            data-user-id="{{ user.id }}"
+                                            data-username="{{ user.username }}"
+                                            data-firstname="{{ user.first_name }}"
+                                            data-lastname="{{ user.last_name }}"
+                                            data-email="{{ user.email }}"
+                                            data-role="{{ user.role }}"
+                                            data-joindate="{{ user.join_date.strftime('%Y-%m-%d') if user.join_date else '' }}"
+                                            data-isactive="{{ user.is_active|lower }}"
+                                            title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    
+                                    {% if user.id != current_user.id %}
+                                        <form method="POST" 
+                                              action="{{ url_for('admin.deactivate_user', user_id=user.id) }}" 
+                                              class="d-inline">
+                                            <button type="submit" 
+                                                    class="btn {% if user.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                                                    title="{% if user.is_active %}Deactivate{% else %}Activate{% endif %} User"
+                                                    onclick="return confirm('{% if user.is_active %}Deactivate{% else %}Activate{% endif %} user {{ user.username }}?');">
+                                                <i class="fas fa-{% if user.is_active %}times{% else %}check{% endif %}"></i>
+                                            </button>
+                                        </form>
+                                        
+                                        <form method="POST" 
+                                              action="{{ url_for('admin.delete_user', user_id=user.id) }}" 
+                                              class="d-inline">
+                                            <button type="submit" 
+                                                    class="btn btn-outline-danger"
+                                                    title="Delete User"
+                                                    onclick="return confirm('⚠️ Delete user {{ user.username }} permanently? This action cannot be undone!');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <button class="btn btn-outline-secondary" disabled title="Current User">
+                                            <i class="fas fa-user"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -74,7 +186,7 @@
                     {% for page_num in users.iter_pages() %}
                         {% if page_num %}
                             <li class="page-item {% if page_num == users.page %}active{% endif %}">
-                                <a class="page-link" href="{{ url_for('admin.admin_users', page=page_num, role=role_filter) }}">
+                                <a class="page-link" href="{{ url_for('admin.admin_users', page=page_num) }}">
                                     {{ page_num }}
                                 </a>
                             </li>
@@ -86,14 +198,234 @@
             </nav>
             {% endif %}
         {% else %}
-            <div class="alert alert-info">
-                <p class="mb-0">No users found.</p>
+            <div class="alert alert-info text-center py-5">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h4>No Users Found</h4>
+                <p>There are no users in the system.</p>
             </div>
         {% endif %}
     </div>
 </div>
 
-<div class="mt-3">
-    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-circle"></i> User Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="avatar-placeholder bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h4 id="userDetailsName">Loading...</h4>
+                        <p class="text-muted mb-1">
+                            <i class="fas fa-user-tag"></i> 
+                            <span id="userDetailsRole" class="badge bg-info">Loading...</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-id-card"></i> Account Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Username:</th>
+                                <td id="userDetailsUsername">Loading...</td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td id="userDetailsEmail">Loading...</td>
+                            </tr>
+                            <tr>
+                                <th>Join Date:</th>
+                                <td id="userDetailsJoinDate">Loading...</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td id="userDetailsStatus">Loading...</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-chart-bar"></i> Statistics</h6>
+                        <div class="row text-center">
+                            <div class="col-6 mb-2">
+                                <div class="card">
+                                    <div class="card-body py-2">
+                                        <h6 class="mb-0" id="userBorrowedCount">0</h6>
+                                        <small class="text-muted">Books Borrowed</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div class="card">
+                                    <div class="card-body py-2">
+                                        <h6 class="mb-0" id="userCurrentBorrowed">0</h6>
+                                        <small class="text-muted">Currently Borrowed</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card">
+                                    <div class="card-body py-2">
+                                        <h6 class="mb-0" id="userTotalFines">0</h6>
+                                        <small class="text-muted">Total Fines</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card">
+                                    <div class="card-body py-2">
+                                        <h6 class="mb-0" id="userActiveReservations">0</h6>
+                                        <small class="text-muted">Active Reservations</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6><i class="fas fa-history"></i> Recent Activity</h6>
+                    <div id="userRecentActivity" class="small">
+                        <p class="text-muted">Loading activity data...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="editUser()">
+                    <i class="fas fa-edit"></i> Edit User
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Delete All Users Modal -->
+<div class="modal fade" id="deleteAllModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle"></i> Delete All Users
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-skull-crossbones"></i> EXTREME DANGER</h6>
+                    <p class="mb-0">This will delete <strong>ALL user accounts</strong> except your own!</p>
+                </div>
+                
+                <p><strong>⚠️ This action will:</strong></p>
+                <ul>
+                    <li>Delete all user accounts (admins, librarians, members)</li>
+                    <li>Delete all associated transactions, reservations, and fines</li>
+                    <li><strong>Your account will be the only one remaining</strong></li>
+                    <li>This action <strong>CANNOT</strong> be undone</li>
+                </ul>
+                
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="confirmDeleteAll">
+                    <label class="form-check-label" for="confirmDeleteAll">
+                        I understand this will delete ALL users except myself
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('admin.delete_all_users') }}" id="deleteAllForm">
+                    <button type="submit" class="btn btn-danger" id="deleteAllBtn" disabled>
+                        <i class="fas fa-trash"></i> DELETE ALL USERS
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentUserId = null;
+
+function showUserDetails(userId, username, firstName, lastName, email, role, isActive) {
+    currentUserId = userId;
+    
+    // Set basic user information
+    document.getElementById('userDetailsName').textContent = `${firstName} ${lastName}`;
+    document.getElementById('userDetailsUsername').textContent = username;
+    document.getElementById('userDetailsEmail').textContent = email;
+    document.getElementById('userDetailsJoinDate').textContent = 'Join date not available';
+    
+    // Set role with appropriate badge color
+    const roleElement = document.getElementById('userDetailsRole');
+    roleElement.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+    roleElement.className = 'badge ' + 
+        (role === 'admin' ? 'bg-danger' : 
+         role === 'librarian' ? 'bg-warning' : 'bg-info');
+    
+    // Set status
+    const statusElement = document.getElementById('userDetailsStatus');
+    if (isActive) {
+        statusElement.innerHTML = '<span class="badge bg-success">Active</span>';
+    } else {
+        statusElement.innerHTML = '<span class="badge bg-secondary">Inactive</span>';
+    }
+    
+    // Simulate statistics (in real app, fetch from API)
+    document.getElementById('userBorrowedCount').textContent = Math.floor(Math.random() * 20);
+    document.getElementById('userCurrentBorrowed').textContent = Math.floor(Math.random() * 5);
+    document.getElementById('userTotalFines').textContent = Math.floor(Math.random() * 10);
+    document.getElementById('userActiveReservations').textContent = Math.floor(Math.random() * 3);
+    
+    // Simulate recent activity
+    const activities = [
+        'Borrowed "Python Programming"',
+        'Returned "Web Development Guide"',
+        'Reserved "Data Structures"',
+        'Paied fine of £2.50',
+        'Renewed "Algorithms Book"'
+    ];
+    const activityHTML = activities.slice(0, 3).map(activity => 
+        `<div class="mb-1"><i class="fas fa-circle text-success small"></i> ${activity}</div>`
+    ).join('');
+    document.getElementById('userRecentActivity').innerHTML = activityHTML;
+    
+    // Show the modal
+    const userDetailsModal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
+    userDetailsModal.show();
+}
+
+function editUser() {
+    if (currentUserId) {
+        // Redirect to edit page (create this route if needed)
+        window.location.href = `/admin/users/${currentUserId}/edit`;
+    }
+}
+
+document.getElementById('confirmDeleteAll').addEventListener('change', function() {
+    document.getElementById('deleteAllBtn').disabled = !this.checked;
+});
+
+document.getElementById('deleteAllForm').addEventListener('submit', function(e) {
+    if (!confirm('FINAL WARNING: Delete ALL users except yourself?')) {
+        e.preventDefault();
+    }
+});
+</script>
 {% endblock %}

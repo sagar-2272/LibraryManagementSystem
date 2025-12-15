@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
-        <h2>Library Reports & Analytics</h2>
-        <p class="text-muted">Comprehensive overview of library activities and statistics.</p>
+        <h2><i class="fas fa-chart-bar"></i> Library Reports</h2>
+        <p class="text-muted">Comprehensive overview of library activities and statistics</p>
     </div>
 </div>
 
@@ -22,7 +22,15 @@
         <div class="card text-white bg-success">
             <div class="card-body text-center">
                 <h4>{{ total_members }}</h4>
-                <p class="mb-0">Total Members</p>
+                <p class="mb-0">Members</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-white bg-info">
+            <div class="card-body text-center">
+                <h4>{{ total_librarians }}</h4>
+                <p class="mb-0">Librarians</p>
             </div>
         </div>
     </div>
@@ -43,14 +51,6 @@
         </div>
     </div>
     <div class="col-md-2">
-        <div class="card text-white bg-info">
-            <div class="card-body text-center">
-                <h4>{{ total_fines }}</h4>
-                <p class="mb-0">Outstanding Fines</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2">
         <div class="card text-white bg-dark">
             <div class="card-body text-center">
                 <h4>£{{ "%.2f"|format(total_fine_amount) }}</h4>
@@ -63,9 +63,9 @@
 <!-- Popular Books -->
 <div class="row mt-4">
     <div class="col-md-6">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
-                <h5 class="mb-0">📊 Most Popular Books</h5>
+                <h5 class="mb-0"><i class="fas fa-star"></i> Most Popular Books</h5>
             </div>
             <div class="card-body">
                 {% if popular_books %}
@@ -75,7 +75,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-1">{{ book.title }}</h6>
-                                    <small class="text-muted">By {{ book.author }}</small>
+                                    <small class="text-muted">By {{ book.author }} • {{ book.category }}</small>
                                 </div>
                                 <span class="badge bg-primary rounded-pill">{{ count }} borrows</span>
                             </div>
@@ -91,9 +91,9 @@
 
     <!-- Active Members -->
     <div class="col-md-6">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
-                <h5 class="mb-0">👥 Most Active Members</h5>
+                <h5 class="mb-0"><i class="fas fa-users"></i> Most Active Members</h5>
             </div>
             <div class="card-body">
                 {% if active_members %}
@@ -105,7 +105,7 @@
                                     <h6 class="mb-1">{{ user.first_name }} {{ user.last_name }}</h6>
                                     <small class="text-muted">@{{ user.username }}</small>
                                 </div>
-                                <span class="badge bg-success rounded-pill">{{ count }} books</span>
+                                <span class="badge bg-success rounded-pill">{{ count }} books borrowed</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -123,7 +123,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">⚠️ Overdue Books</h5>
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Overdue Books ({{ total_overdue }})</h5>
             </div>
             <div class="card-body">
                 {% if overdue_books %}
@@ -135,14 +135,14 @@
                                     <th>Borrower</th>
                                     <th>Due Date</th>
                                     <th>Days Overdue</th>
-                                    <th>Fine Amount</th>
+                                    <th>Estimated Fine</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for transaction in overdue_books %}
+                                {% for transaction, book, user in overdue_books %}
                                 <tr>
-                                    <td>{{ transaction.book.title }}</td>
-                                    <td>{{ transaction.user.first_name }} {{ transaction.user.last_name }}</td>
+                                    <td>{{ book.title }}</td>
+                                    <td>{{ user.first_name }} {{ user.last_name }}</td>
                                     <td>{{ transaction.due_date.strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         {% set days_overdue = (now - transaction.due_date).days %}
@@ -155,8 +155,10 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="alert alert-success">
-                        <p class="mb-0">No overdue books! 🎉</p>
+                    <div class="alert alert-success text-center py-4">
+                        <i class="fas fa-check-circle fa-3x mb-3"></i>
+                        <h4>No Overdue Books!</h4>
+                        <p class="mb-0">All books have been returned on time. Excellent!</p>
                     </div>
                 {% endif %}
             </div>
@@ -164,7 +166,47 @@
     </div>
 </div>
 
-<div class="mt-3">
-    <a href="{{ url_for('member.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+<!-- Export Options -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-download"></i> Export Reports</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary w-100 mb-2">
+                            <i class="fas fa-file-pdf"></i> Export to PDF
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-success w-100 mb-2">
+                            <i class="fas fa-file-csv"></i> Export to CSV
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-info w-100 mb-2">
+                            <i class="fas fa-print"></i> Print Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Generation Date -->
+<div class="row mt-3">
+    <div class="col-md-12">
+        <p class="text-muted text-end small">
+            <i class="fas fa-calendar-alt"></i> Report generated: {{ now.strftime('%Y-%m-%d %H:%M:%S') }}
+        </p>
+    </div>
 </div>
 {% endblock %}
